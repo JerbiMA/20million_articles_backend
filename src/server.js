@@ -1,9 +1,23 @@
 const app = require('./app');
 const { config, connectDB, logger } = require('./config');
+const Category = require('./modules/category/category.model');
+const { seedData } = require('./scripts/seed');
 
 const startServer = async () => {
   // Connect to MongoDB
   await connectDB();
+
+  // Auto-seed if database is freshly started and empty
+  try {
+    const categoryCount = await Category.countDocuments();
+    if (categoryCount === 0) {
+      logger.info('🌱 Database is empty. Auto-seeding initial catalog (teams, products, users)...');
+      await seedData(false);
+      logger.info('✅ Initial data auto-seeded successfully.');
+    }
+  } catch (seedErr) {
+    logger.warn(`Auto-seed notice: ${seedErr.message}`);
+  }
 
   const server = app.listen(config.port, () => {
     logger.info(`🚀 Server running in ${config.env} mode on port ${config.port}`);

@@ -5,34 +5,39 @@ const config = require('./env');
 /**
  * Connect to MongoDB with retry logic and event listeners.
  */
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(config.mongo.uri, {
-      // Modern Mongoose 7+ defaults are solid; these are explicit for clarity
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
+const connectDB = async (retries = 6, delay = 3000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const conn = await mongoose.connect(config.mongo.uri, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      });
 
-    logger.info(`✅ MongoDB connected: ${conn.connection.host}`);
+      logger.info(`✅ MongoDB connected: ${conn.connection.host}`);
 
-    // Connection event listeners
-    mongoose.connection.on('error', (err) => {
-      logger.error(`MongoDB connection error: ${err.message}`);
-    });
+      // Connection event listeners
+      mongoose.connection.on('error', (err) => {
+        logger.error(`MongoDB connection error: ${err.message}`);
+      });
 
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected. Attempting reconnection...');
-    });
+      mongoose.connection.on('disconnected', () => {
+        logger.warn('MongoDB disconnected. Attempting reconnection...');
+      });
 
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected.');
-    });
+      mongoose.connection.on('reconnected', () => {
+        logger.info('MongoDB reconnected.');
+      });
 
-    return conn;
-  } catch (error) {
-    logger.error(`❌ MongoDB connection failed: ${error.message}`);
-    process.exit(1);
+      return conn;
+    } catch (error) {
+      if (attempt === retries) {
+        logger.error(`❌ MongoDB connection failed after ${retries} attempts: ${error.message}`);
+        process.exit(1);
+      }
+      logger.warn(`MongoDB connecting... (attempt ${attempt}/${retries}) - retrying in ${delay / 1000}s`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
   }
 };
 

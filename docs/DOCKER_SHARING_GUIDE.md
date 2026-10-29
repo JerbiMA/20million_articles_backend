@@ -9,18 +9,17 @@ This guide explains how to package and send the entire backend stack (API, Mongo
 1. **`Dockerfile` added**:
    - Built on `node:20-alpine`.
    - Runs the backend API on port `5000`.
-2. **`docker-compose.yml` updated**:
+2. **`docker-compose.yml` simplified**:
    - Added the `api` service (backend container).
    - Configured Docker internal networking (`mongo:27017`).
-   - Configured health checks so `api` waits until MongoDB is ready.
+   - Removed fragile shell healthcheck so Docker starts immediately without timing out.
    - Added port mappings for all services:
      - **API & Swagger**: `http://localhost:5000` / `http://localhost:5000/api-docs`
      - **MongoDB**: `localhost:27017`
      - **Mongo Express GUI**: `http://localhost:8081` (`test` / `test`)
 3. **Automatic Database Seeding on First Boot**:
-   - Complete database dump saved in `docker/init-mongo/dump/mriwl_dev` (all 45 teams, 10 products, 6 categories, coupons, and test users).
-   - Mounted to `/docker-entrypoint-initdb.d`.
-   - When your friend launches Docker for the first time, **MongoDB automatically restores all collections with zero manual commands**!
+   - When the backend connects for the first time, it checks if the database is empty. If empty, it **automatically runs the seed script directly inside Node.js** to create all 45 teams, 10 products, 6 categories, coupons, and test users!
+   - Self-contained, zero shell script permission issues, zero `mongorestore` dependencies.
 4. **`.dockerignore` added**:
    - Excludes heavy `node_modules`, `logs/`, and local files from the build.
 

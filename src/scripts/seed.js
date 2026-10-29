@@ -12,9 +12,11 @@ const Team = require('../modules/team/team.model');
 const Product = require('../modules/product/product.model');
 const Coupon = require('../modules/coupon/coupon.model');
 
-const seedData = async () => {
+const seedData = async (shouldExit = true) => {
   try {
-    await connectDB();
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
 
     // ─── Clear existing data ──────────────────────
     await Promise.all([
@@ -426,10 +428,17 @@ const seedData = async () => {
     logger.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   } catch (error) {
     logger.error('❌ Seeding failed:', error);
+    throw error;
   } finally {
-    await disconnectDB();
-    process.exit(0);
+    if (shouldExit) {
+      await disconnectDB();
+      process.exit(0);
+    }
   }
 };
 
-seedData();
+if (require.main === module) {
+  seedData(true);
+}
+
+module.exports = { seedData };
