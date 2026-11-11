@@ -52,6 +52,15 @@ const userController = {
     const user = await userService.getUserById(req.user.id);
     ApiResponse.ok(res, 'Profile retrieved successfully', user);
   }),
+
+  /**
+   * PUT /api/v1/users/me
+   * Update the currently authenticated user's profile.
+   */
+  updateMe: catchAsync(async (req, res) => {
+    const user = await userService.updateUser(req.user.id, req.body);
+    ApiResponse.ok(res, 'Profile updated successfully', user);
+  }),
 };
 
 module.exports = userController;

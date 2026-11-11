@@ -37,6 +37,13 @@ const userValidation = {
     }).min(1), // At least one field must be provided
   },
 
+  updateProfile: {
+    body: Joi.object({
+      name: Joi.string().trim().min(2).max(50),
+      email: Joi.string().email().lowercase().trim(),
+    }).min(1),
+  },
+
   deleteUser: {
     params: Joi.object({
       id: Joi.string()

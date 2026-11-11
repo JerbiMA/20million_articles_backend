@@ -352,31 +352,7 @@ Click **Authorize** below and paste your JWT Bearer token: \`Bearer <your_token>
         },
       },
     },
-    '/auth/me': {
-      get: {
-        tags: ['Authentication'],
-        summary: 'Get currently authenticated user',
-        security: [{ BearerAuth: [] }],
-        responses: {
-          200: {
-            description: 'Authenticated user profile',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                    data: { $ref: '#/components/schemas/User' },
-                  },
-                },
-              },
-            },
-          },
-          401: { $ref: '#/components/schemas/ErrorResponse' },
-        },
-      },
-    },
-    '/auth/refresh-token': {
+    '/auth/refresh': {
       post: {
         tags: ['Authentication'],
         summary: 'Refresh access token using refresh token cookie or body',
@@ -922,7 +898,7 @@ Click **Authorize** below and paste your JWT Bearer token: \`Bearer <your_token>
     // ──────────────────────────────────────────────
     // USER SELF-SERVICE
     // ──────────────────────────────────────────────
-    '/users/profile': {
+    '/users/me': {
       get: {
         tags: ['User Profile'],
         summary: 'Get current user profile',
@@ -943,16 +919,7 @@ Click **Authorize** below and paste your JWT Bearer token: \`Bearer <your_token>
                 type: 'object',
                 properties: {
                   name: { type: 'string', example: 'John Updated' },
-                  phone: { type: 'string', example: '+212699887766' },
-                  address: {
-                    type: 'object',
-                    properties: {
-                      street: { type: 'string' },
-                      city: { type: 'string' },
-                      postalCode: { type: 'string' },
-                      country: { type: 'string' },
-                    },
-                  },
+                  email: { type: 'string', format: 'email', example: 'john.updated@example.com' },
                 },
               },
             },
@@ -963,9 +930,9 @@ Click **Authorize** below and paste your JWT Bearer token: \`Bearer <your_token>
         },
       },
     },
-    '/users/change-password': {
-      put: {
-        tags: ['User Profile'],
+    '/auth/change-password': {
+      post: {
+        tags: ['Authentication'],
         summary: 'Change current user password',
         security: [{ BearerAuth: [] }],
         requestBody: {

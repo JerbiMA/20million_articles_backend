@@ -20,6 +20,7 @@ router.use(authenticate);
 
 // Current user
 router.get('/me', userController.getMe);
+router.put('/me', validate(userValidation.updateProfile), userController.updateMe);
 
 // Admin-only routes
 router.get('/', authorize('admin'), validate(userValidation.getUsers), userController.getUsers);
