@@ -8,7 +8,10 @@ const productController = {
    * GET /api/v1/products
    */
   getProducts: catchAsync(async (req, res) => {
-    const result = await productService.getProducts(req.query);
+    const result = await productService.getProducts({
+      ...req.query,
+      isActive: req.query.isActive ?? true,
+    });
     ApiResponse.ok(res, 'Products retrieved', result.products, result.pagination);
   }),
 
@@ -54,18 +57,10 @@ const productController = {
   createProduct: catchAsync(async (req, res) => {
     const data = { ...req.body };
 
-    // Parse sizes if sent as JSON string
-    if (typeof data.sizes === 'string') {
-      data.sizes = JSON.parse(data.sizes);
-    }
-    if (typeof data.tags === 'string') {
-      data.tags = JSON.parse(data.tags);
-    }
-
     // Handle uploaded images
     if (req.files && req.files.length > 0) {
       data.images = req.files.map((file, index) => ({
-        url: file.path,
+        url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
         publicId: file.filename,
         isMain: index === 0,
       }));
@@ -101,7 +96,7 @@ const productController = {
     }
 
     const images = req.files.map((file) => ({
-      url: file.path,
+      url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
       publicId: file.filename,
       isMain: false,
     }));
@@ -122,8 +117,9 @@ const productController = {
    * PATCH /api/v1/admin/products/:id/stock
    */
   updateStock: catchAsync(async (req, res) => {
-    const { size, stock } = req.body;
-    const product = await productService.updateStock(req.params.id, size, stock);
+    const product = req.body.sizes
+      ? await productService.updateProduct(req.params.id, { sizes: req.body.sizes })
+      : await productService.updateStock(req.params.id, req.body.size, req.body.stock);
     ApiResponse.ok(res, 'Stock updated', product);
   }),
 

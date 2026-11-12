@@ -77,8 +77,11 @@ const productValidation = {
   updateStock: {
     params: Joi.object({ id: objectId.required() }),
     body: Joi.object({
-      size: Joi.string().valid(...SIZES).required(),
-      stock: Joi.number().integer().min(0).required(),
+      size: Joi.string().valid(...SIZES),
+      stock: Joi.number().integer().min(0),
+      sizes: Joi.array().items(sizeVariant).min(1),
+    }).xor('size', 'sizes').when(Joi.object({ size: Joi.exist() }).unknown(), {
+      then: Joi.object({ stock: Joi.required() }),
     }),
   },
 

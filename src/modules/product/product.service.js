@@ -18,7 +18,7 @@ const productService = {
     size,
     search,
     isFeatured,
-    isActive = true,
+    isActive,
     tag,
   } = {}) {
     const filter = {};

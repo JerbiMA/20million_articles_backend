@@ -38,7 +38,10 @@ const categoryController = {
     const data = { ...req.body };
 
     if (req.file) {
-      data.image = { url: req.file.path, publicId: req.file.filename };
+      data.image = {
+        url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
+        publicId: req.file.filename,
+      };
     }
 
     const category = await categoryService.createCategory(data);
@@ -52,7 +55,10 @@ const categoryController = {
     const data = { ...req.body };
 
     if (req.file) {
-      data.image = { url: req.file.path, publicId: req.file.filename };
+      data.image = {
+        url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
+        publicId: req.file.filename,
+      };
     }
 
     const category = await categoryService.updateCategory(req.params.id, data);

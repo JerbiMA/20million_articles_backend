@@ -37,7 +37,10 @@ const teamController = {
     const data = { ...req.body };
 
     if (req.file) {
-      data.logo = { url: req.file.path, publicId: req.file.filename };
+      data.logo = {
+        url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
+        publicId: req.file.filename,
+      };
     }
 
     const team = await teamService.createTeam(data);
@@ -51,7 +54,10 @@ const teamController = {
     const data = { ...req.body };
 
     if (req.file) {
-      data.logo = { url: req.file.path, publicId: req.file.filename };
+      data.logo = {
+        url: `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`,
+        publicId: req.file.filename,
+      };
     }
 
     const team = await teamService.updateTeam(req.params.id, data);

@@ -34,6 +34,10 @@ const errorConverter = (err, _req, _res, next) => {
     } else if (error.name === 'TokenExpiredError') {
       error = ApiError.unauthorized('Token expired');
     }
+    // Multipart upload errors (file type, size, or field limits)
+    else if (error.name === 'MulterError' || error.code === 'LIMIT_FILE_SIZE') {
+      error = ApiError.badRequest(error.message || 'Invalid image upload');
+    }
     // Generic fallback
     else {
       const statusCode = error.statusCode || 500;

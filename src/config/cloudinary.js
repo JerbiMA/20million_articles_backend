@@ -1,25 +1,18 @@
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const fs = require('fs');
+const path = require('path');
 const multer = require('multer');
-const config = require('./env');
+const uploadsDirectory = path.resolve(__dirname, '../../uploads');
+fs.mkdirSync(uploadsDirectory, { recursive: true });
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: config.cloudinary.cloudName,
-  api_key: config.cloudinary.apiKey,
-  api_secret: config.cloudinary.apiSecret,
-});
-
-/**
- * Multer storage engine for Cloudinary.
- * Uploads go to the 'mriwl' folder, auto-formatted as webp.
- */
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'mriwl',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 'auto' }],
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, uploadsDirectory),
+  filename: (_req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+    const baseName = path.basename(file.originalname, extension)
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase() || 'image';
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}-${baseName}${extension}`);
   },
 });
 
@@ -41,18 +34,21 @@ const upload = multer({
 });
 
 /**
- * Delete an image from Cloudinary by its public ID.
+ * Delete a locally stored image by its filename.
  * @param {string} publicId - Cloudinary public ID
  */
 const deleteImage = async (publicId) => {
   if (!publicId) {
     return;
   }
-  return cloudinary.uploader.destroy(publicId);
+  const filePath = path.join(uploadsDirectory, path.basename(publicId));
+  if (filePath.startsWith(`${uploadsDirectory}${path.sep}`)) {
+    await fs.promises.rm(filePath, { force: true });
+  }
 };
 
 /**
- * Extract the public ID from a Cloudinary URL.
+ * Kept for compatibility with existing category and team services.
  * @param {string} url - Full Cloudinary URL
  * @returns {string|null} Public ID
  */
@@ -60,20 +56,12 @@ const getPublicIdFromUrl = (url) => {
   if (!url) {
     return null;
   }
-  // URL format: https://res.cloudinary.com/<cloud>/image/upload/v123/mriwl/filename.ext
-  const parts = url.split('/');
-  const uploadIndex = parts.indexOf('upload');
-  if (uploadIndex === -1) {
-    return null;
-  }
-  // Everything after 'upload/vXXX/' is the public ID (without extension)
-  const pathAfterUpload = parts.slice(uploadIndex + 2).join('/');
-  return pathAfterUpload.replace(/\.[^/.]+$/, ''); // Remove file extension
+  return path.basename(url);
 };
 
 module.exports = {
-  cloudinary,
   upload,
   deleteImage,
   getPublicIdFromUrl,
+  uploadsDirectory,
 };

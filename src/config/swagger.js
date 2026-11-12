@@ -81,7 +81,7 @@ Click **Authorize** below and paste your JWT Bearer token: \`Bearer <your_token>
           image: {
             type: 'object',
             properties: {
-              url: { type: 'string', example: 'https://res.cloudinary.com/demo/image/upload/sample.jpg' },
+              url: { type: 'string', example: 'http://localhost:5000/uploads/sample.jpg' },
               publicId: { type: 'string', example: 'sample' },
             },
           },
@@ -101,7 +101,7 @@ Click **Authorize** below and paste your JWT Bearer token: \`Bearer <your_token>
           logo: {
             type: 'object',
             properties: {
-              url: { type: 'string', example: 'https://res.cloudinary.com/demo/image/upload/sample.jpg' },
+              url: { type: 'string', example: 'http://localhost:5000/uploads/sample.jpg' },
               publicId: { type: 'string', example: 'sample' },
             },
           },

@@ -1,7 +1,7 @@
 const config = require('./env');
 const { connectDB, disconnectDB } = require('./db');
 const logger = require('./logger');
-const { cloudinary, upload, deleteImage, getPublicIdFromUrl } = require('./cloudinary');
+const { upload, deleteImage, getPublicIdFromUrl, uploadsDirectory } = require('./cloudinary');
 const swaggerSpec = require('./swagger');
 
 module.exports = {
@@ -9,10 +9,9 @@ module.exports = {
   connectDB,
   disconnectDB,
   logger,
-  cloudinary,
   upload,
   deleteImage,
   getPublicIdFromUrl,
+  uploadsDirectory,
   swaggerSpec,
 };
-

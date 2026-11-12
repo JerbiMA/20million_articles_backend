@@ -1,4 +1,5 @@
 const ApiError = require('../shared/utils/ApiError');
+const { logger } = require('../config');
 
 /**
  * Creates a validation middleware from a Joi schema.
@@ -36,7 +37,9 @@ const validate = (schema) => (req, _res, next) => {
   });
 
   if (validationErrors.length > 0) {
-    return next(ApiError.badRequest('Validation failed', validationErrors));
+    logger.warn(`Validation details: ${JSON.stringify(validationErrors)}`);
+    const summary = validationErrors.map(({ field, message }) => `${field}: ${message}`).join(' · ');
+    return next(ApiError.badRequest(`Validation failed — ${summary}`, validationErrors));
   }
 
   next();

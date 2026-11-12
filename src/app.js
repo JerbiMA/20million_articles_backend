@@ -7,7 +7,7 @@ const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 
-const { config, swaggerSpec } = require('./config');
+const { config, swaggerSpec, uploadsDirectory } = require('./config');
 const { httpLogger, apiLimiter, errorConverter, errorHandler } = require('./middlewares');
 const ApiError = require('./shared/utils/ApiError');
 const apiRouter = require('./routes');
@@ -64,6 +64,9 @@ app.use(hpp());
 
 // ─── Gzip Compression ──────────────────────────
 app.use(compression());
+
+// Product, team, and category images are stored locally by the API.
+app.use('/uploads', express.static(uploadsDirectory));
 
 // ─── HTTP Request Logging ───────────────────────
 app.use(httpLogger);
